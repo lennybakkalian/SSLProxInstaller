@@ -17,7 +17,7 @@ public class U {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		});
+		}).start();
 	}
 
 	public static interface EmptyCallback {

@@ -128,14 +128,6 @@ public class App {
 			e.printStackTrace();
 		}
 
-		if (update) {
-			if (sslproxFile.exists())
-				sslproxFile.delete();
-			System.out.println("[DL] Latest sslprox file");
-			setStatus("Download latest SSLProx release...");
-			Unirest.get(argMap.get("api") + "/public/files/download/latest").asFile(sslproxFile.getAbsolutePath());
-		}
-
 		// load libraries
 		HttpResponse<JsonNode> libRes = Unirest.get(argMap.get("api") + "/public/files").asJson();
 		JSONArray libFiles = libRes.getBody().getArray();
@@ -171,8 +163,23 @@ public class App {
 			}
 		});
 
+		if (update) {
+			if (sslproxFile.exists())
+				sslproxFile.delete();
+			System.out.println("[DL] Latest sslprox file");
+			setStatus("Download latest SSLProx release... " + newestVersion);
+			if (argMap.containsKey("startapp"))
+				Thread.sleep(1000); // prevent file lock when started by sslprox
+			Unirest.get(argMap.get("api") + "/public/files/download/latest").asFile(sslproxFile.getAbsolutePath());
+		}
+
 		setStatus("Done");
 
+		if (argMap.containsKey("startapp")) {
+			setStatus("Restart SSLProx...");
+			U.exec("\"jre/bin/java.exe\" -jar sslprox.jar", null, p -> System.exit(0));
+			Thread.sleep(5000);
+		}
 		System.exit(0);
 	}
 
